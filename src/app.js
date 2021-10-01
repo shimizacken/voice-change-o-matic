@@ -7,7 +7,6 @@ const init = () => {
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   const voiceSelect = document.getElementById("voice");
   let source;
-  let stream;
 
   // grab the mute button to use below
 
@@ -143,6 +142,11 @@ const init = () => {
         const sliceWidth = (WIDTH * 1.0) / bufferLength;
         let x = 0;
 
+        console.log(
+          "🚀 ~ file: app.js ~ line 148 ~ draw ~ dataArray",
+          dataArray
+        );
+
         for (let i = 0; i < bufferLength; i++) {
           const v = dataArray[i] / 128.0;
           const y = (v * HEIGHT) / 2;
@@ -164,7 +168,7 @@ const init = () => {
     } else if (visualSetting == "frequencybars") {
       analyser.fftSize = 256;
       const bufferLengthAlt = analyser.frequencyBinCount;
-      console.log(bufferLengthAlt);
+      console.log("bufferLengthAlt", bufferLengthAlt);
       const dataArrayAlt = new Uint8Array(bufferLengthAlt);
 
       canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
