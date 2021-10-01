@@ -2,66 +2,34 @@ const init = () => {
   heading.textContent = "Voice-change-O-matic";
   document.body.removeEventListener("click", init);
 
-  // Older browsers might not implement mediaDevices at all, so we set an empty object first
-  if (navigator.mediaDevices === undefined) {
-    navigator.mediaDevices = {};
-  }
-
-  // Some browsers partially implement mediaDevices. We can't just assign an object
-  // with getUserMedia as it would overwrite existing properties.
-  // Here, we will just add the getUserMedia property if it's missing.
-  if (navigator.mediaDevices.getUserMedia === undefined) {
-    navigator.mediaDevices.getUserMedia = function (constraints) {
-      // First get ahold of the legacy getUserMedia, if present
-      const getUserMedia =
-        navigator.webkitGetUserMedia ||
-        navigator.mozGetUserMedia ||
-        navigator.msGetUserMedia;
-
-      // Some browsers just don't implement it - return a rejected promise with an error
-      // to keep a consistent interface
-      if (!getUserMedia) {
-        return Promise.reject(
-          new Error("getUserMedia is not implemented in this browser")
-        );
-      }
-
-      // Otherwise, wrap the call to the old navigator.getUserMedia with a Promise
-      return new Promise(function (resolve, reject) {
-        getUserMedia.call(navigator, constraints, resolve, reject);
-      });
-    };
-  }
-
   // set up forked web audio context, for multiple browsers
   // window. is needed otherwise Safari explodes
-
-  var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  var voiceSelect = document.getElementById("voice");
-  var source;
-  var stream;
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const voiceSelect = document.getElementById("voice");
+  let source;
+  let stream;
 
   // grab the mute button to use below
 
-  var mute = document.querySelector(".mute");
+  const mute = document.querySelector(".mute");
 
   //set up the different audio nodes we will use for the app
 
-  var analyser = audioCtx.createAnalyser();
+  const analyser = audioCtx.createAnalyser();
   analyser.minDecibels = -90;
   analyser.maxDecibels = -10;
   analyser.smoothingTimeConstant = 0.85;
 
-  var distortion = audioCtx.createWaveShaper();
-  var gainNode = audioCtx.createGain();
-  var biquadFilter = audioCtx.createBiquadFilter();
-  var convolver = audioCtx.createConvolver();
+  const distortion = audioCtx.createWaveShaper();
+  const gainNode = audioCtx.createGain();
+  const biquadFilter = audioCtx.createBiquadFilter();
+  const convolver = audioCtx.createConvolver();
 
   // distortion curve for the waveshaper, thanks to Kevin Ennis
   // http://stackoverflow.com/questions/22312841/waveshaper-node-in-webaudio-how-to-emulate-distortion
 
   function makeDistortionCurve(amount) {
-    var k = typeof amount === "number" ? amount : 50,
+    let k = typeof amount === "number" ? amount : 50,
       n_samples = 44100,
       curve = new Float32Array(n_samples),
       deg = Math.PI / 180,
@@ -76,7 +44,7 @@ const init = () => {
 
   // grab audio track via XHR for convolver node
 
-  var soundSource;
+  let soundSource;
 
   ajaxRequest = new XMLHttpRequest();
 
@@ -89,7 +57,7 @@ const init = () => {
   ajaxRequest.responseType = "arraybuffer";
 
   ajaxRequest.onload = function () {
-    var audioData = ajaxRequest.response;
+    const audioData = ajaxRequest.response;
 
     audioCtx.decodeAudioData(
       audioData,
@@ -101,32 +69,28 @@ const init = () => {
         console.log("Error with decoding audio data" + e.err);
       }
     );
-
-    //soundSource.connect(audioCtx.destination);
-    //soundSource.loop = true;
-    //soundSource.start();
   };
 
   ajaxRequest.send();
 
   // set up canvas context for visualizer
 
-  var canvas = document.querySelector(".visualizer");
-  var canvasCtx = canvas.getContext("2d");
+  const canvas = document.querySelector(".visualizer");
+  const canvasCtx = canvas.getContext("2d");
 
-  var intendedWidth = document.querySelector(".wrapper").clientWidth;
+  const intendedWidth = document.querySelector(".wrapper").clientWidth;
 
   canvas.setAttribute("width", intendedWidth);
 
-  var visualSelect = document.getElementById("visual");
+  const visualSelect = document.getElementById("visual");
 
-  var drawVisual;
+  let drawVisual;
 
   //main block for doing the audio recording
 
   if (navigator.mediaDevices.getUserMedia) {
     console.log("getUserMedia supported.");
-    var constraints = { audio: true };
+    const constraints = { audio: true };
     navigator.mediaDevices
       .getUserMedia(constraints)
       .then(function (stream) {
@@ -142,7 +106,7 @@ const init = () => {
         voiceChange();
       })
       .catch(function (err) {
-        console.log("The following gUM error occured: " + err);
+        console.log("The following gUM error occurred: " + err);
       });
   } else {
     console.log("getUserMedia not supported on your browser!");
@@ -152,18 +116,18 @@ const init = () => {
     WIDTH = canvas.width;
     HEIGHT = canvas.height;
 
-    var visualSetting = visualSelect.value;
-    console.log(visualSetting);
+    const visualSetting = visualSelect.value;
+    console.log("visualSetting", visualSetting);
 
     if (visualSetting === "sinewave") {
       analyser.fftSize = 2048;
-      var bufferLength = analyser.fftSize;
+      const bufferLength = analyser.fftSize;
       console.log(bufferLength);
-      var dataArray = new Uint8Array(bufferLength);
+      const dataArray = new Uint8Array(bufferLength);
 
       canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
 
-      var draw = function () {
+      const draw = () => {
         drawVisual = requestAnimationFrame(draw);
 
         analyser.getByteTimeDomainData(dataArray);
@@ -176,12 +140,12 @@ const init = () => {
 
         canvasCtx.beginPath();
 
-        var sliceWidth = (WIDTH * 1.0) / bufferLength;
-        var x = 0;
+        const sliceWidth = (WIDTH * 1.0) / bufferLength;
+        let x = 0;
 
-        for (var i = 0; i < bufferLength; i++) {
-          var v = dataArray[i] / 128.0;
-          var y = (v * HEIGHT) / 2;
+        for (let i = 0; i < bufferLength; i++) {
+          const v = dataArray[i] / 128.0;
+          const y = (v * HEIGHT) / 2;
 
           if (i === 0) {
             canvasCtx.moveTo(x, y);
@@ -199,13 +163,13 @@ const init = () => {
       draw();
     } else if (visualSetting == "frequencybars") {
       analyser.fftSize = 256;
-      var bufferLengthAlt = analyser.frequencyBinCount;
+      const bufferLengthAlt = analyser.frequencyBinCount;
       console.log(bufferLengthAlt);
-      var dataArrayAlt = new Uint8Array(bufferLengthAlt);
+      const dataArrayAlt = new Uint8Array(bufferLengthAlt);
 
       canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
 
-      var drawAlt = function () {
+      const drawAlt = () => {
         drawVisual = requestAnimationFrame(drawAlt);
 
         analyser.getByteFrequencyData(dataArrayAlt);
@@ -213,11 +177,11 @@ const init = () => {
         canvasCtx.fillStyle = "rgb(0, 0, 0)";
         canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
 
-        var barWidth = (WIDTH / bufferLengthAlt) * 2.5;
-        var barHeight;
-        var x = 0;
+        const barWidth = (WIDTH / bufferLengthAlt) * 2.5;
+        let barHeight;
+        let x = 0;
 
-        for (var i = 0; i < bufferLengthAlt; i++) {
+        for (let i = 0; i < bufferLengthAlt; i++) {
           barHeight = dataArrayAlt[i];
 
           canvasCtx.fillStyle = "rgb(" + (barHeight + 100) + ",50,50)";
@@ -244,7 +208,7 @@ const init = () => {
     distortion.oversample = "4x";
     biquadFilter.gain.setTargetAtTime(0, audioCtx.currentTime, 0);
 
-    var voiceSetting = voiceSelect.value;
+    const voiceSetting = voiceSelect.value;
     console.log(voiceSetting);
 
     //when convolver is selected it is connected back into the audio path
