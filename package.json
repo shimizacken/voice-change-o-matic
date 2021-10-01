@@ -1,0 +1,11 @@
+{
+  "name": "voice-change-o-matic",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/shimizacken/voice-change-o-matic.git",
+  "author": "shimizacken <shimizacken@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^4.4.3"
+  }
+}
