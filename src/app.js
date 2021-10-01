@@ -1,8 +1,4 @@
-const heading = document.querySelector("h1");
-heading.textContent = "CLICK ANYWHERE TO START";
-document.body.addEventListener("click", init);
-
-function init() {
+const init = () => {
   heading.textContent = "Voice-change-O-matic";
   document.body.removeEventListener("click", init);
 
@@ -295,4 +291,8 @@ function init() {
       mute.innerHTML = "Mute";
     }
   }
-}
+};
+
+const heading = document.querySelector("h1");
+heading.textContent = "CLICK ANYWHERE TO START";
+document.body.addEventListener("click", init);
